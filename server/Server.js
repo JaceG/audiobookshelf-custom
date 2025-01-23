@@ -225,7 +225,7 @@ class Server {
       //  if (Logger.isDev || req.path.match(/\/api\/items\/([a-z0-9-]{36})\/(ebook|cover)(\/[0-9]+)?/)) {
       //   const allowedOrigins = ['capacitor://localhost', 'http://localhost']
       //  if (global.AllowCors || Logger.isDev || allowedOrigins.some((o) => o === req.get('origin'))) {
-      res.header('Access-Control-Allow-Origin', req.get('origin'))
+      res.header('Access-Control-Allow-Origin', '*')
       res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS')
       res.header('Access-Control-Allow-Headers', '*')
       res.header('Access-Control-Allow-Credentials', true)

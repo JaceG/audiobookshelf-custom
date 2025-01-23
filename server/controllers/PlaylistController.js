@@ -25,6 +25,8 @@ class PlaylistController {
   async create(req, res) {
     const oldPlaylist = new Playlist()
     req.body.userId = req.user.id
+    const personalProfile = req.query.personalProfile || 0
+
     const success = oldPlaylist.setData(req.body)
     if (!success) {
       return res.status(400).send('Invalid playlist request data')
@@ -59,6 +61,17 @@ class PlaylistController {
       await Database.createBulkPlaylistMediaItems(mediaItemsToAdd)
     }
 
+    if (Boolean(Number(personalProfile))) {
+      // Create library with libraryFolders
+      await Database.models.userPlaylist
+        .create({
+          userId: newPlaylist.userId,
+          playlistId: newPlaylist.id
+        })
+        .catch((error) => {
+          Logger.error(`[AuthenticatedCustomController] Failed to assign playlistId to user "${newPlaylist.userId}"`, error)
+        })
+    }
     const jsonExpanded = await newPlaylist.getOldJsonExpanded()
     SocketAuthority.clientEmitter(newPlaylist.userId, 'playlist_added', jsonExpanded)
     res.json(jsonExpanded)
