@@ -560,9 +560,10 @@ module.exports = {
       }
     }
 
+    let userBookIds = []
     if (onlyUserItems) {
       const userLibraryItems = await Database.userLibraryItemModel.findAll({ where: { userId: user.id }, include: 'libraryItem' })
-      const userBookIds = userLibraryItems.map((userLibItem) => {
+      userBookIds = userLibraryItems.map((userLibItem) => {
         return userLibItem.libraryItem.mediaId
       })
       bookWhere.push({
@@ -593,8 +594,13 @@ module.exports = {
       limit: limit || null,
       offset
     })
-
-    const libraryItems = books.map((bookExpanded) => {
+    let libraryItems = books
+    if (onlyUserItems) {
+      libraryItems = libraryItems.filter((book) => {
+        return userBookIds.includes(book.id)
+      })
+    }
+    libraryItems = libraryItems.map((bookExpanded) => {
       const libraryItem = bookExpanded.libraryItem.toJSON()
       const book = bookExpanded.toJSON()
 

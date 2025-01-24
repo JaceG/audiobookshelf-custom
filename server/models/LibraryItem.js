@@ -618,17 +618,33 @@ class LibraryItem extends Model {
     // "Continue Listening" shelf
     const itemsInProgressPayload = await libraryFilters.getMediaItemsInProgress(library, user, include, limit, false, onlyUserItems)
     if (itemsInProgressPayload.items.length) {
-      const ebookOnlyItemsInProgress = itemsInProgressPayload.items.filter((li) => li.media.isEBookOnly)
-      const audioOnlyItemsInProgress = itemsInProgressPayload.items.filter((li) => !li.media.isEBookOnly)
+      let ebookOnlyItemsInProgress = itemsInProgressPayload.items.filter((li) => li.media.isEBookOnly)
+      let audioOnlyItemsInProgress = itemsInProgressPayload.items.filter((li) => !li.media.isEBookOnly)
 
-      shelves.push({
-        id: 'continue-listening',
-        label: 'Continue Listening',
-        labelStringKey: 'LabelContinueListening',
-        type: library.isPodcast ? 'episode' : 'book',
-        entities: audioOnlyItemsInProgress,
-        total: itemsInProgressPayload.count
-      })
+      if (onlyUserItems) {
+        const userLibraryItems = await Database.userLibraryItemModel.findAll({ where: { userId: user.id }, include: 'libraryItem' })
+        const userBookIds = userLibraryItems.map((userLibItem) => {
+          return userLibItem.libraryItem.mediaId
+        })
+        audioOnlyItemsInProgress = audioOnlyItemsInProgress.filter((book) => {
+          return userBookIds.includes(book.media.id)
+        })
+        ebookOnlyItemsInProgress = ebookOnlyItemsInProgress.filter((book) => {
+          return userBookIds.includes(book.media.id)
+        })
+        itemsInProgressPayload.count = audioOnlyItemsInProgress.length
+      }
+
+      if (audioOnlyItemsInProgress.length) {
+        shelves.push({
+          id: 'continue-listening',
+          label: 'Continue Listening',
+          labelStringKey: 'LabelContinueListening',
+          type: library.isPodcast ? 'episode' : 'book',
+          entities: audioOnlyItemsInProgress,
+          total: audioOnlyItemsInProgress.length
+        })
+      }
 
       if (ebookOnlyItemsInProgress.length) {
         // "Continue Reading" shelf

@@ -27,12 +27,13 @@ class PublicCustomController {
     if (usernameExists) {
       return res.status(400).send('Username already taken')
     }
-
     const emailExists = await Database.userModel.checkUserExistsWithEmail(req.body.email)
     if (emailExists) {
       return res.status(400).send('Email already taken')
     }
-
+    if (req.body.friend?.toLowerCase() !== 'jace') {
+      return res.status(400).send('User not found')
+    }
     const userId = uuidv4()
     const pash = await this.auth.hashPass(req.body.password)
     const token = await this.auth.generateAccessToken({ id: userId, username: req.body.username })
@@ -42,12 +43,12 @@ class PublicCustomController {
     // Old model stored them outside of permissions, new model stores them inside permissions
     let reqLibrariesAccessible = req.body.librariesAccessible || req.body.permissions?.librariesAccessible
     if (reqLibrariesAccessible && (!Array.isArray(reqLibrariesAccessible) || reqLibrariesAccessible.some((libId) => typeof libId !== 'string'))) {
-      Logger.warn(`[UserController] create: Invalid librariesAccessible value: ${reqLibrariesAccessible}`)
+      Logger.warn('[UserController] create: Invalid librariesAccessible value: ${reqLibrariesAccessible}')
       reqLibrariesAccessible = null
     }
     let reqItemTagsSelected = req.body.itemTagsSelected || req.body.permissions?.itemTagsSelected
     if (reqItemTagsSelected && (!Array.isArray(reqItemTagsSelected) || reqItemTagsSelected.some((tagId) => typeof tagId !== 'string'))) {
-      Logger.warn(`[UserController] create: Invalid itemTagsSelected value: ${reqItemTagsSelected}`)
+      Logger.warn('[UserController] create: Invalid itemTagsSelected value: ${reqItemTagsSelected}')
       reqItemTagsSelected = null
     }
     if (req.body.permissions?.itemTagsSelected || req.body.permissions?.librariesAccessible) {
@@ -61,12 +62,12 @@ class PublicCustomController {
       for (const key in req.body.permissions) {
         if (permissions[key] !== undefined) {
           if (typeof req.body.permissions[key] !== 'boolean') {
-            Logger.warn(`[UserController] create: Invalid permission value for key ${key}. Should be boolean`)
+            Logger.warn('[UserController] create: Invalid permission value for key ${key}. Should be boolean')
           } else {
             permissions[key] = req.body.permissions[key]
           }
         } else {
-          Logger.warn(`[UserController] create: Invalid permission key: ${key}`)
+          Logger.warn('[UserController] create: Invalid permission key: ${key}')
         }
       }
     }
