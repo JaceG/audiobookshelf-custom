@@ -5,8 +5,8 @@
   "description": "Self-hosted audiobook and podcast server",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --watch server index.js",
-    "start": "node index.js",
+    "dev": "node api.js && nodemon --watch server index.js",
+    "start": "node api.js && node index.js",
     "client": "cd client && npm ci && npm run generate",
     "prod": "npm run client && node prod.js",
     "build-win": "npm run client && pkg -t node20-win-x64 -o ./dist/win/audiobookshelf -C GZip .",
