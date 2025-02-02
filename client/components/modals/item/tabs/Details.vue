@@ -1,6 +1,5 @@
 <template>
   <div class="w-full h-full relative">
-    jkkjhjkhkjhkjhhjkhkjhkjh
     <div id="formWrapper" class="w-full overflow-y-auto">
       <widgets-book-details-edit v-if="mediaType == 'book'" ref="itemDetailsEdit" :library-item="libraryItem" @submit="saveAndClose" />
       <widgets-podcast-details-edit v-else ref="itemDetailsEdit" :library-item="libraryItem" @submit="saveAndClose" />
